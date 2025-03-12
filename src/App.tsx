@@ -1,4 +1,4 @@
-import { SkiResortDisplay } from "./components/SkiResortDisplay";
+import { GameDisplay } from "./components/GameDisplay";
 
 function App() {
   return (
@@ -6,12 +6,12 @@ function App() {
       <header className="text-center mb-8">
         <h1 className="text-3xl font-bold text-blue-800">Ski-O-Guessr</h1>
         <p className="text-gray-600 mt-2">
-          Explore ski resorts from around the world
+          Can you identify these ski resorts from their trail maps?
         </p>
       </header>
 
       <main>
-        <SkiResortDisplay />
+        <GameDisplay />
       </main>
 
       <footer className="mt-12 text-center text-gray-500 text-sm">

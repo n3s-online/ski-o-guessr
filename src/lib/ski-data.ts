@@ -12,6 +12,10 @@ export interface SkiResortMetadata {
   boxes: number[][];
 }
 
+export const getAllSkiResorts = (): SkiResort[] => {
+  return skiData.skiResorts;
+};
+
 export const getRandomSkiResort = (): SkiResort => {
   const { skiResorts } = skiData;
   const randomIndex = Math.floor(Math.random() * skiResorts.length);
@@ -20,6 +24,10 @@ export const getRandomSkiResort = (): SkiResort => {
 
 export const getSkiResortImageUrl = (folderName: string): string => {
   return `/ski-images/${folderName}/ski_map_original.png`;
+};
+
+export const getSkiResortRedactedImageUrl = (folderName: string): string => {
+  return `/ski-images/${folderName}/ski_map_redacted.png`;
 };
 
 export const loadSkiResortMetadata = async (
