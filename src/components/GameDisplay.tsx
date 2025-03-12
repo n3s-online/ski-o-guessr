@@ -217,9 +217,13 @@ export function GameDisplay() {
   }
 
   // Filter out already guessed resorts
-  const availableResorts = skiResorts.filter(
-    (resort) => !previousGuesses.includes(resort.folderName)
-  );
+  const availableResorts = skiResorts
+    .filter((resort) => !previousGuesses.includes(resort.folderName))
+    .sort((a, b) =>
+      formatResortName(a.folderName).localeCompare(
+        formatResortName(b.folderName)
+      )
+    );
 
   return (
     <div className="w-full max-w-5xl mx-auto">
