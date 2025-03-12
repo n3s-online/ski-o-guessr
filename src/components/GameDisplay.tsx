@@ -215,7 +215,7 @@ export function GameDisplay() {
                 How to Play
               </Button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent className="overflow-y-auto">
               <SheetHeader>
                 <SheetTitle className="text-2xl text-blue-800 dark:text-blue-400">
                   How to Play Ski-O-Guessr
