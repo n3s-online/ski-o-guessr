@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader } from "./ui/card";
 import {
   Table,
   TableBody,
@@ -184,10 +183,10 @@ export function GameDisplay() {
   );
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader className="text-2xl font-bold text-center">
-        <div className="flex justify-between items-center">
-          <h2>Guess the Ski Resort</h2>
+    <div className="w-full max-w-4xl mx-auto">
+      <div className="text-center mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">Guess the Ski Resort</h2>
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
               <button className="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200">
@@ -229,172 +228,168 @@ export function GameDisplay() {
             </SheetContent>
           </Sheet>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-6">
-          <img
-            src={
-              guessedCorrectly
-                ? getSkiResortImageUrl(currentResort.folderName)
-                : getSkiResortRedactedImageUrl(currentResort.folderName)
-            }
-            alt="Ski resort map"
-            className="w-full h-auto rounded-lg shadow-lg"
-          />
-        </div>
+      </div>
 
-        {guessedCorrectly ? (
-          <div className="text-center mb-6">
-            <Alert className="mb-4 border-green-200 bg-green-50">
-              <AlertTitle className="text-green-800">Correct!</AlertTitle>
-              <AlertDescription className="text-green-700">
-                You've successfully identified {metadata.name}.
-              </AlertDescription>
-            </Alert>
-            <p className="mb-4">
-              <span className="font-medium">Country:</span> {metadata.country} |
-              <span className="font-medium"> Region:</span> {metadata.region} |
-              <span className="font-medium"> Parent Company:</span>{" "}
-              {metadata.parent_company}
-            </p>
-            <button
-              onClick={handleNewGame}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Play Again
-            </button>
+      <div className="mb-6">
+        <img
+          src={
+            guessedCorrectly
+              ? getSkiResortImageUrl(currentResort.folderName)
+              : getSkiResortRedactedImageUrl(currentResort.folderName)
+          }
+          alt="Ski resort map"
+          className="w-full h-auto rounded-lg shadow-lg"
+        />
+      </div>
+
+      {guessedCorrectly ? (
+        <div className="text-center mb-6">
+          <Alert className="mb-4 border-green-200 bg-green-50">
+            <AlertTitle className="text-green-800">Correct!</AlertTitle>
+            <AlertDescription className="text-green-700">
+              You've successfully identified {metadata.name}.
+            </AlertDescription>
+          </Alert>
+          <p className="mb-4">
+            <span className="font-medium">Country:</span> {metadata.country} |
+            <span className="font-medium"> Region:</span> {metadata.region} |
+            <span className="font-medium"> Parent Company:</span>{" "}
+            {metadata.parent_company}
+          </p>
+          <button
+            onClick={handleNewGame}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Play Again
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="flex-grow">
+              <label htmlFor="resort-select" className="block mb-2 font-medium">
+                Select a ski resort:
+              </label>
+              <select
+                id="resort-select"
+                value={selectedResort}
+                onChange={(e) => setSelectedResort(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded"
+                disabled={availableResorts.length === 0 || guessedCorrectly}
+              >
+                <option value="">-- Select a resort --</option>
+                {availableResorts.map((resort) => (
+                  <option key={resort.folderName} value={resort.folderName}>
+                    {formatResortName(resort.folderName)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={handleGuess}
+                disabled={!selectedResort || guessedCorrectly}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                Submit Guess
+              </button>
+            </div>
           </div>
-        ) : (
-          <>
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
-              <div className="flex-grow">
-                <label
-                  htmlFor="resort-select"
-                  className="block mb-2 font-medium"
-                >
-                  Select a ski resort:
-                </label>
-                <select
-                  id="resort-select"
-                  value={selectedResort}
-                  onChange={(e) => setSelectedResort(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  disabled={availableResorts.length === 0 || guessedCorrectly}
-                >
-                  <option value="">-- Select a resort --</option>
-                  {availableResorts.map((resort) => (
-                    <option key={resort.folderName} value={resort.folderName}>
-                      {formatResortName(resort.folderName)}
-                    </option>
-                  ))}
-                </select>
+
+          {guessResults.length > 0 && (
+            <div className="mb-6">
+              <div className="flex flex-col items-center mb-2">
+                <h3 className="font-semibold text-lg">Your Guesses</h3>
+                <Separator className="flex-grow ml-3" />
               </div>
-              <div className="flex items-end">
-                <button
-                  onClick={handleGuess}
-                  disabled={!selectedResort || guessedCorrectly}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                  Submit Guess
-                </button>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Resort</TableHead>
+                      <TableHead>Country</TableHead>
+                      <TableHead>Region</TableHead>
+                      <TableHead>Parent Company</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {guessResults.map((result, index) => (
+                      <TableRow key={index}>
+                        <TableCell
+                          className={
+                            result.resortName === currentResort.folderName
+                              ? "bg-green-100"
+                              : "bg-red-100"
+                          }
+                        >
+                          {formatResortName(result.resortName)}
+                        </TableCell>
+                        <TableCell
+                          className={
+                            result.metadata &&
+                            isMatchingField(
+                              result.metadata.country,
+                              metadata.country
+                            )
+                              ? "bg-green-100"
+                              : "bg-red-100"
+                          }
+                        >
+                          {result.metadata?.country || "Unknown"}
+                        </TableCell>
+                        <TableCell
+                          className={
+                            result.metadata &&
+                            isMatchingField(
+                              result.metadata.region,
+                              metadata.region
+                            )
+                              ? "bg-green-100"
+                              : "bg-red-100"
+                          }
+                        >
+                          {result.metadata?.region || "Unknown"}
+                        </TableCell>
+                        <TableCell
+                          className={
+                            result.metadata &&
+                            isMatchingField(
+                              result.metadata.parent_company,
+                              metadata.parent_company
+                            )
+                              ? "bg-green-100"
+                              : "bg-red-100"
+                          }
+                        >
+                          {result.metadata?.parent_company || "Unknown"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             </div>
+          )}
 
-            {guessResults.length > 0 && (
-              <div className="mb-6">
-                <div className="flex items-center mb-2">
-                  <h3 className="font-semibold text-lg">Your Guesses</h3>
-                  <Separator className="flex-grow ml-3" />
-                </div>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Resort</TableHead>
-                        <TableHead>Country</TableHead>
-                        <TableHead>Region</TableHead>
-                        <TableHead>Parent Company</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {guessResults.map((result, index) => (
-                        <TableRow key={index}>
-                          <TableCell
-                            className={
-                              result.resortName === currentResort.folderName
-                                ? "bg-green-100"
-                                : "bg-red-100"
-                            }
-                          >
-                            {formatResortName(result.resortName)}
-                          </TableCell>
-                          <TableCell
-                            className={
-                              result.metadata &&
-                              isMatchingField(
-                                result.metadata.country,
-                                metadata.country
-                              )
-                                ? "bg-green-100"
-                                : "bg-red-100"
-                            }
-                          >
-                            {result.metadata?.country || "Unknown"}
-                          </TableCell>
-                          <TableCell
-                            className={
-                              result.metadata &&
-                              isMatchingField(
-                                result.metadata.region,
-                                metadata.region
-                              )
-                                ? "bg-green-100"
-                                : "bg-red-100"
-                            }
-                          >
-                            {result.metadata?.region || "Unknown"}
-                          </TableCell>
-                          <TableCell
-                            className={
-                              result.metadata &&
-                              isMatchingField(
-                                result.metadata.parent_company,
-                                metadata.parent_company
-                              )
-                                ? "bg-green-100"
-                                : "bg-red-100"
-                            }
-                          >
-                            {result.metadata?.parent_company || "Unknown"}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            )}
-
-            {availableResorts.length === 0 && !guessedCorrectly && (
-              <div className="text-center mb-6">
-                <Alert variant="destructive" className="mb-4">
-                  <AlertTitle>Game Over</AlertTitle>
-                  <AlertDescription>
-                    You've used all available guesses! The correct answer was:{" "}
-                    {metadata.name}
-                  </AlertDescription>
-                </Alert>
-                <button
-                  onClick={handleNewGame}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  Play Again
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </CardContent>
-    </Card>
+          {availableResorts.length === 0 && !guessedCorrectly && (
+            <div className="text-center mb-6">
+              <Alert variant="destructive" className="mb-4">
+                <AlertTitle>Game Over</AlertTitle>
+                <AlertDescription>
+                  You've used all available guesses! The correct answer was:{" "}
+                  {metadata.name}
+                </AlertDescription>
+              </Alert>
+              <button
+                onClick={handleNewGame}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Play Again
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
 }
