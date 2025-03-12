@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
+import {
   getAllSkiResorts,
   getSkiResortRedactedImageUrl,
   getSkiResortImageUrl,
@@ -8,6 +16,12 @@ import {
   SkiResortMetadata,
   SkiResort,
 } from "../lib/ski-data";
+
+// Define a type for guess results
+interface GuessResult {
+  resortName: string;
+  metadata: SkiResortMetadata | null;
+}
 
 export function GameDisplay() {
   const [skiResorts, setSkiResorts] = useState<SkiResort[]>([]);
@@ -17,7 +31,11 @@ export function GameDisplay() {
   const [error, setError] = useState<string | null>(null);
   const [guessedCorrectly, setGuessedCorrectly] = useState(false);
   const [previousGuesses, setPreviousGuesses] = useState<string[]>([]);
+  const [guessResults, setGuessResults] = useState<GuessResult[]>([]);
   const [selectedResort, setSelectedResort] = useState<string>("");
+  const [resortMetadataMap, setResortMetadataMap] = useState<
+    Record<string, SkiResortMetadata>
+  >({});
 
   useEffect(() => {
     const loadGame = async () => {
@@ -26,15 +44,28 @@ export function GameDisplay() {
         const allResorts = getAllSkiResorts();
         setSkiResorts(allResorts);
 
+        // Load metadata for all resorts
+        const metadataMap: Record<string, SkiResortMetadata> = {};
+        for (const resort of allResorts) {
+          try {
+            const resortMetadata = await loadSkiResortMetadata(
+              resort.folderName
+            );
+            metadataMap[resort.folderName] = resortMetadata;
+          } catch (err) {
+            console.error(
+              `Failed to load metadata for ${resort.folderName}:`,
+              err
+            );
+          }
+        }
+        setResortMetadataMap(metadataMap);
+
         // Select a random resort to guess
         const randomIndex = Math.floor(Math.random() * allResorts.length);
         const randomResort = allResorts[randomIndex];
         setCurrentResort(randomResort);
-
-        const resortMetadata = await loadSkiResortMetadata(
-          randomResort.folderName
-        );
-        setMetadata(resortMetadata);
+        setMetadata(metadataMap[randomResort.folderName]);
       } catch (err) {
         console.error("Error loading ski resort data:", err);
         setError("Failed to load ski resort data. Please try again.");
@@ -47,10 +78,20 @@ export function GameDisplay() {
   }, []);
 
   const handleGuess = async () => {
-    if (!selectedResort || !currentResort) return;
+    if (!selectedResort || !currentResort || !metadata) return;
 
     // Add to previous guesses
     setPreviousGuesses((prev) => [...prev, selectedResort]);
+
+    // Add to guess results with metadata
+    const guessMetadata = resortMetadataMap[selectedResort] || null;
+    setGuessResults((prev) => [
+      ...prev,
+      {
+        resortName: selectedResort,
+        metadata: guessMetadata,
+      },
+    ]);
 
     // Check if guess is correct
     if (selectedResort === currentResort.folderName) {
@@ -66,6 +107,7 @@ export function GameDisplay() {
     setError(null);
     setGuessedCorrectly(false);
     setPreviousGuesses([]);
+    setGuessResults([]);
     setSelectedResort("");
 
     try {
@@ -75,17 +117,29 @@ export function GameDisplay() {
       const randomIndex = Math.floor(Math.random() * allResorts.length);
       const randomResort = allResorts[randomIndex];
       setCurrentResort(randomResort);
-
-      const resortMetadata = await loadSkiResortMetadata(
-        randomResort.folderName
-      );
-      setMetadata(resortMetadata);
+      setMetadata(resortMetadataMap[randomResort.folderName]);
     } catch (err) {
       console.error("Error loading ski resort data:", err);
       setError("Failed to load ski resort data. Please try again.");
     } finally {
       setLoading(false);
     }
+  };
+
+  // Function to format resort name for display
+  const formatResortName = (folderName: string): string => {
+    return folderName
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (l) => l.toUpperCase());
+  };
+
+  // Function to check if a metadata field matches the current resort
+  const isMatchingField = (
+    guessValue: string | undefined,
+    actualValue: string | undefined
+  ): boolean => {
+    if (!guessValue || !actualValue) return false;
+    return guessValue.toLowerCase() === actualValue.toLowerCase();
   };
 
   if (loading) {
@@ -166,14 +220,12 @@ export function GameDisplay() {
                   value={selectedResort}
                   onChange={(e) => setSelectedResort(e.target.value)}
                   className="w-full p-2 border border-gray-300 rounded"
-                  disabled={availableResorts.length === 0}
+                  disabled={availableResorts.length === 0 || guessedCorrectly}
                 >
                   <option value="">-- Select a resort --</option>
                   {availableResorts.map((resort) => (
                     <option key={resort.folderName} value={resort.folderName}>
-                      {resort.folderName
-                        .replace(/-/g, " ")
-                        .replace(/\b\w/g, (l) => l.toUpperCase())}
+                      {formatResortName(resort.folderName)}
                     </option>
                   ))}
                 </select>
@@ -181,7 +233,7 @@ export function GameDisplay() {
               <div className="flex items-end">
                 <button
                   onClick={handleGuess}
-                  disabled={!selectedResort}
+                  disabled={!selectedResort || guessedCorrectly}
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   Submit Guess
@@ -189,27 +241,77 @@ export function GameDisplay() {
               </div>
             </div>
 
-            {previousGuesses.length > 0 && (
-              <div className="mb-6">
-                <h3 className="font-semibold text-lg mb-2">
-                  Previous Guesses:
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {previousGuesses.map((guess, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-gray-200 rounded-full text-sm"
-                    >
-                      {guess
-                        .replace(/-/g, " ")
-                        .replace(/\b\w/g, (l) => l.toUpperCase())}
-                    </span>
-                  ))}
-                </div>
+            {guessResults.length > 0 && (
+              <div className="mb-6 overflow-x-auto">
+                <h3 className="font-semibold text-lg mb-2">Your Guesses:</h3>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Resort</TableHead>
+                      <TableHead>Country</TableHead>
+                      <TableHead>Region</TableHead>
+                      <TableHead>Parent Company</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {guessResults.map((result, index) => (
+                      <TableRow key={index}>
+                        <TableCell
+                          className={
+                            result.resortName === currentResort.folderName
+                              ? "bg-green-100"
+                              : "bg-red-100"
+                          }
+                        >
+                          {formatResortName(result.resortName)}
+                        </TableCell>
+                        <TableCell
+                          className={
+                            result.metadata &&
+                            isMatchingField(
+                              result.metadata.country,
+                              metadata.country
+                            )
+                              ? "bg-green-100"
+                              : "bg-red-100"
+                          }
+                        >
+                          {result.metadata?.country || "Unknown"}
+                        </TableCell>
+                        <TableCell
+                          className={
+                            result.metadata &&
+                            isMatchingField(
+                              result.metadata.region,
+                              metadata.region
+                            )
+                              ? "bg-green-100"
+                              : "bg-red-100"
+                          }
+                        >
+                          {result.metadata?.region || "Unknown"}
+                        </TableCell>
+                        <TableCell
+                          className={
+                            result.metadata &&
+                            isMatchingField(
+                              result.metadata.parent_company,
+                              metadata.parent_company
+                            )
+                              ? "bg-green-100"
+                              : "bg-red-100"
+                          }
+                        >
+                          {result.metadata?.parent_company || "Unknown"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             )}
 
-            {availableResorts.length === 0 && (
+            {availableResorts.length === 0 && !guessedCorrectly && (
               <div className="text-center mb-6">
                 <p className="text-red-500 mb-2">
                   You've used all available guesses!
