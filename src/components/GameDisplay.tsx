@@ -1,12 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Separator } from "./ui/separator";
 import {
@@ -49,12 +41,8 @@ import {
   ArrowDown,
 } from "lucide-react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-
-// Define a type for guess results
-interface GuessResult {
-  resortName: string;
-  metadata: SkiResortMetadata | null;
-}
+import { GuessesTable } from "./GuessesTable";
+import { GuessResult } from "../types/game";
 
 export function GameDisplay() {
   const [skiResorts, setSkiResorts] = useState<SkiResort[]>([]);
@@ -528,6 +516,19 @@ export function GameDisplay() {
             <RefreshCw className="mr-2 h-5 w-5" />
             Play Again
           </Button>
+
+          {/* Use the GuessesTable component with additional margin */}
+          {guessResults.length > 0 && (
+            <div className="mt-8">
+              <GuessesTable
+                guessResults={guessResults}
+                currentResort={currentResort}
+                metadata={metadata}
+                formatResortName={formatResortName}
+                isMatchingField={isMatchingField}
+              />
+            </div>
+          )}
         </div>
       ) : (
         <>
@@ -572,182 +573,14 @@ export function GameDisplay() {
             </div>
           </div>
 
-          {guessResults.length > 0 && (
-            <div className="mb-8 px-2">
-              <div className="flex flex-col items-center mb-4">
-                <h3 className="font-semibold text-xl text-gray-800 dark:text-gray-200">
-                  Your Guesses
-                </h3>
-                <Separator className="flex-grow ml-4" />
-              </div>
-              <div className="overflow-x-auto rounded-lg shadow">
-                <Table>
-                  <TableHeader className="bg-gray-50 dark:bg-gray-800">
-                    <TableRow>
-                      <TableHead className="font-semibold">Resort</TableHead>
-                      <TableHead className="font-semibold">Country</TableHead>
-                      <TableHead className="font-semibold">Region</TableHead>
-                      <TableHead className="font-semibold">Continent</TableHead>
-                      <TableHead className="font-semibold">Acreage</TableHead>
-                      <TableHead className="font-semibold">Lifts</TableHead>
-                      <TableHead className="font-semibold">
-                        Parent Company
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {guessResults.map((result, index) => (
-                      <TableRow
-                        key={index}
-                        className="border-b dark:border-gray-700"
-                      >
-                        <TableCell
-                          className={
-                            result.resortName === currentResort.folderName
-                              ? "bg-green-200 text-green-800 dark:bg-green-700/60 dark:text-green-100 font-medium"
-                              : "bg-red-200 text-red-800 dark:bg-red-700/60 dark:text-red-100"
-                          }
-                        >
-                          {formatResortName(result.resortName)}
-                        </TableCell>
-                        <TableCell
-                          className={
-                            result.metadata &&
-                            isMatchingField(
-                              result.metadata.country,
-                              metadata.country
-                            )
-                              ? "bg-green-200 text-green-800 dark:bg-green-700/60 dark:text-green-100"
-                              : "bg-red-200 text-red-800 dark:bg-red-700/60 dark:text-red-100"
-                          }
-                        >
-                          {result.metadata?.country || "Unknown"}
-                        </TableCell>
-                        <TableCell
-                          className={
-                            result.metadata &&
-                            isMatchingField(
-                              result.metadata.region,
-                              metadata.region
-                            )
-                              ? "bg-green-200 text-green-800 dark:bg-green-700/60 dark:text-green-100"
-                              : "bg-red-200 text-red-800 dark:bg-red-700/60 dark:text-red-100"
-                          }
-                        >
-                          {result.metadata?.region || "Unknown"}
-                        </TableCell>
-                        <TableCell
-                          className={
-                            result.metadata &&
-                            isMatchingField(
-                              result.metadata.continent,
-                              metadata.continent
-                            )
-                              ? "bg-green-200 text-green-800 dark:bg-green-700/60 dark:text-green-100"
-                              : "bg-red-200 text-red-800 dark:bg-red-700/60 dark:text-red-100"
-                          }
-                        >
-                          {result.metadata?.continent || "Unknown"}
-                        </TableCell>
-                        <TableCell
-                          className={
-                            result.metadata &&
-                            result.metadata.skiable_acreage ===
-                              metadata.skiable_acreage
-                              ? "bg-green-200 text-green-800 dark:bg-green-700/60 dark:text-green-100"
-                              : "bg-red-200 text-red-800 dark:bg-red-700/60 dark:text-red-100"
-                          }
-                        >
-                          {result.metadata?.skiable_acreage || "Unknown"}
-                          {result.metadata &&
-                            metadata &&
-                            result.metadata.skiable_acreage !==
-                              metadata.skiable_acreage &&
-                            result.metadata.skiable_acreage !== undefined && (
-                              <span className="ml-2 inline-flex items-center">
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <span>
-                                        {result.metadata.skiable_acreage >
-                                        metadata.skiable_acreage ? (
-                                          <ArrowDown className="h-4 w-4" />
-                                        ) : (
-                                          <ArrowUp className="h-4 w-4" />
-                                        )}
-                                      </span>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>
-                                        {result.metadata.skiable_acreage >
-                                        metadata.skiable_acreage
-                                          ? "Too high"
-                                          : "Too low"}
-                                      </p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              </span>
-                            )}
-                        </TableCell>
-                        <TableCell
-                          className={
-                            result.metadata &&
-                            result.metadata.lifts === metadata.lifts
-                              ? "bg-green-200 text-green-800 dark:bg-green-700/60 dark:text-green-100"
-                              : "bg-red-200 text-red-800 dark:bg-red-700/60 dark:text-red-100"
-                          }
-                        >
-                          {result.metadata?.lifts || "Unknown"}
-                          {result.metadata &&
-                            metadata &&
-                            result.metadata.lifts !== metadata.lifts &&
-                            result.metadata.lifts !== undefined && (
-                              <span className="ml-2 inline-flex items-center">
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <span>
-                                        {result.metadata.lifts >
-                                        metadata.lifts ? (
-                                          <ArrowDown className="h-4 w-4" />
-                                        ) : (
-                                          <ArrowUp className="h-4 w-4" />
-                                        )}
-                                      </span>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>
-                                        {result.metadata.lifts > metadata.lifts
-                                          ? "Too high"
-                                          : "Too low"}
-                                      </p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              </span>
-                            )}
-                        </TableCell>
-                        <TableCell
-                          className={
-                            result.metadata &&
-                            isMatchingField(
-                              result.metadata.parent_company,
-                              metadata.parent_company
-                            )
-                              ? "bg-green-200 text-green-800 dark:bg-green-700/60 dark:text-green-100"
-                              : "bg-red-200 text-red-800 dark:bg-red-700/60 dark:text-red-100"
-                          }
-                        >
-                          {result.metadata?.parent_company || "Unknown"}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          )}
+          {/* Use the GuessesTable component */}
+          <GuessesTable
+            guessResults={guessResults}
+            currentResort={currentResort}
+            metadata={metadata}
+            formatResortName={formatResortName}
+            isMatchingField={isMatchingField}
+          />
 
           {availableResorts.length === 0 && !guessedCorrectly && (
             <div className="text-center mb-8 px-2">
