@@ -1,31 +1,64 @@
 {
     "skiResorts": [
         {
-            "folderName": "chamonix"
+            "folderName": "chamonix",
+            "name": "Chamonix"
         },
         {
-            "folderName": "zermatt"
+            "folderName": "zermatt",
+            "name": "Zermatt"
         },
         {
-            "folderName": "powderhorn"
+            "folderName": "powderhorn",
+            "name": "Powderhorn"
         },
         {
-            "folderName": "whistler"
+            "folderName": "via-lattea",
+            "name": "Via Lattea (Milky Way)"
         },
         {
-            "folderName": "stevens-pass"
+            "folderName": "whistler",
+            "name": "Whistler"
         },
         {
-            "folderName": "beaver-creek"
+            "folderName": "les-4-vallees",
+            "name": "Les 4 Vall\u00e9es"
         },
         {
-            "folderName": "niseko"
+            "folderName": "tignes",
+            "name": "Val d\u2019Isere-Tignes"
         },
         {
-            "folderName": "breckenridge"
+            "folderName": "park-city",
+            "name": "Park City"
         },
         {
-            "folderName": "snoqualmie-summit-central"
+            "folderName": "stevens-pass",
+            "name": "Stevens Pass"
+        },
+        {
+            "folderName": "beaver-creek",
+            "name": "Beaver Creek"
+        },
+        {
+            "folderName": "niseko",
+            "name": "Niseko United"
+        },
+        {
+            "folderName": "breckenridge",
+            "name": "Breckenridge"
+        },
+        {
+            "folderName": "paradiski",
+            "name": "La Plagne Paradiski"
+        },
+        {
+            "folderName": "snoqualmie-summit-central",
+            "name": "Snoqualmie (Central)"
+        },
+        {
+            "folderName": "arlberg",
+            "name": "Arlberg"
         }
     ]
 }
