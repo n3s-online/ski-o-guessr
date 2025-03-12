@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Table,
   TableBody,
@@ -73,6 +73,12 @@ export function GameDisplay() {
   const [imageLoading, setImageLoading] = useState(true);
   const [showZoomHint, setShowZoomHint] = useState(true);
 
+  // New state variables for progressive reveal
+  const [revealPercentage, setRevealPercentage] = useState(33);
+  const [centerCoordinates, setCenterCoordinates] = useState({ x: 50, y: 50 });
+  const imageRef = useRef<HTMLImageElement>(null);
+  const transformComponentRef = useRef(null);
+
   useEffect(() => {
     const loadGame = async () => {
       try {
@@ -102,6 +108,14 @@ export function GameDisplay() {
         const randomResort = allResorts[randomIndex];
         setCurrentResort(randomResort);
         setMetadata(metadataMap[randomResort.folderName]);
+
+        // Generate random coordinates within the middle 40% of the image
+        const x = 30 + Math.random() * 40; // 30% to 70%
+        const y = 30 + Math.random() * 40; // 30% to 70%
+        setCenterCoordinates({ x, y });
+
+        // Reset reveal percentage to 33%
+        setRevealPercentage(33);
       } catch (err) {
         console.error("Error loading ski resort data:", err);
         setError("Failed to load ski resort data. Please try again.");
@@ -143,6 +157,16 @@ export function GameDisplay() {
     // Check if guess is correct
     if (selectedResort === currentResort.folderName) {
       setGuessedCorrectly(true);
+      setRevealPercentage(100); // Show full image on correct guess
+    } else {
+      // Update reveal percentage based on number of guesses
+      if (previousGuesses.length === 0) {
+        // After first guess, show 66%
+        setRevealPercentage(66);
+      } else if (previousGuesses.length === 1) {
+        // After second guess, show 100%
+        setRevealPercentage(100);
+      }
     }
 
     // Reset selection
@@ -159,6 +183,9 @@ export function GameDisplay() {
     setImageLoading(true);
     setShowZoomHint(true);
 
+    // Reset reveal percentage to 33%
+    setRevealPercentage(33);
+
     try {
       const allResorts = getAllSkiResorts();
 
@@ -167,6 +194,11 @@ export function GameDisplay() {
       const randomResort = allResorts[randomIndex];
       setCurrentResort(randomResort);
       setMetadata(resortMetadataMap[randomResort.folderName]);
+
+      // Generate new random coordinates within the middle 40% of the image
+      const x = 30 + Math.random() * 40; // 30% to 70%
+      const y = 30 + Math.random() * 40; // 30% to 70%
+      setCenterCoordinates({ x, y });
     } catch (err) {
       console.error("Error loading ski resort data:", err);
       setError("Failed to load ski resort data. Please try again.");
@@ -190,6 +222,17 @@ export function GameDisplay() {
     if (!guessValue || !actualValue) return false;
     return guessValue.toLowerCase() === actualValue.toLowerCase();
   };
+
+  // Effect to reset zoom when reveal percentage changes
+  useEffect(() => {
+    if (transformComponentRef.current) {
+      // Small delay to allow the clip-path transition to start
+      setTimeout(() => {
+        // @ts-ignore - The type definitions don't include resetTransform, but it exists
+        transformComponentRef.current.resetTransform();
+      }, 100);
+    }
+  }, [revealPercentage]);
 
   if (loading) {
     return (
@@ -233,6 +276,24 @@ export function GameDisplay() {
       )
     );
 
+  // Calculate the clip path based on reveal percentage and center coordinates
+  const getClipPath = () => {
+    if (revealPercentage >= 100) {
+      return "none"; // Show full image
+    }
+
+    const halfWidth = revealPercentage / 2;
+    const halfHeight = revealPercentage / 2;
+
+    // Calculate the clip path coordinates based on center point and reveal percentage
+    const left = Math.max(0, centerCoordinates.x - halfWidth);
+    const right = Math.min(100, centerCoordinates.x + halfWidth);
+    const top = Math.max(0, centerCoordinates.y - halfHeight);
+    const bottom = Math.min(100, centerCoordinates.y + halfHeight);
+
+    return `inset(${top}% ${100 - right}% ${100 - bottom}% ${left}%)`;
+  };
+
   return (
     <div className="w-full max-w-5xl mx-auto">
       <div className="text-center mb-6">
@@ -259,7 +320,7 @@ export function GameDisplay() {
               <div className="py-6">
                 <h3 className="font-medium text-xl mb-3">Game Rules:</h3>
                 <ol className="list-decimal pl-6 space-y-3">
-                  <li>You'll be shown a redacted ski resort map.</li>
+                  <li>You'll be shown a portion of a ski resort map.</li>
                   <li>
                     Select a resort from the dropdown and submit your guess.
                   </li>
@@ -267,12 +328,14 @@ export function GameDisplay() {
                     Green cells indicate correct information, red cells indicate
                     incorrect information.
                   </li>
+                  <li>After each guess, more of the map will be revealed.</li>
                   <li>
                     Keep guessing until you identify the correct resort or run
                     out of options.
                   </li>
                   <li>
-                    The full map will be revealed when you guess correctly.
+                    The full map will be revealed when you guess correctly or
+                    after your second guess.
                   </li>
                 </ol>
                 <Separator className="my-6" />
@@ -308,6 +371,7 @@ export function GameDisplay() {
           centerOnInit={true}
           limitToBounds={true}
           doubleClick={{ disabled: false, mode: "reset" }}
+          ref={transformComponentRef}
         >
           {({ zoomIn, zoomOut, resetTransform }) => (
             <>
@@ -365,6 +429,7 @@ export function GameDisplay() {
               </div>
               <TransformComponent wrapperClass="w-full h-full max-h-[70vh] overflow-hidden flex items-center justify-center">
                 <img
+                  ref={imageRef}
                   src={
                     guessedCorrectly
                       ? getSkiResortImageUrl(currentResort.folderName)
@@ -374,6 +439,10 @@ export function GameDisplay() {
                   className="max-w-full max-h-[70vh] object-contain"
                   onLoad={() => setImageLoading(false)}
                   draggable="false"
+                  style={{
+                    clipPath: getClipPath(),
+                    transition: "clip-path 0.5s ease-in-out",
+                  }}
                 />
               </TransformComponent>
 
@@ -381,6 +450,19 @@ export function GameDisplay() {
                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm animate-pulse">
                   <p className="flex items-center gap-2">
                     <Plus className="h-3 w-3" /> Zoom in to see details
+                  </p>
+                </div>
+              )}
+
+              {revealPercentage < 100 && !imageLoading && (
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm">
+                  <p>
+                    {revealPercentage}% of map revealed
+                    {previousGuesses.length === 0
+                      ? " (first guess)"
+                      : previousGuesses.length === 1
+                      ? " (second guess)"
+                      : ""}
                   </p>
                 </div>
               )}
