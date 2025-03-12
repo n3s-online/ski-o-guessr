@@ -1,10 +1,14 @@
 import { GameDisplay } from "./components/GameDisplay";
+import { ThemeToggle } from "./components/ui/theme-toggle";
 
 function App() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 dark:text-white">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <header className="text-center mb-8 md:mb-12">
+        <header className="text-center mb-8 md:mb-12 relative">
+          <div className="absolute right-0 top-0">
+            <ThemeToggle />
+          </div>
           <h1 className="text-4xl md:text-5xl font-bold text-blue-800 dark:text-blue-400 tracking-tight">
             Ski-O-Guessr
           </h1>

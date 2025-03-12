@@ -489,8 +489,8 @@ export function GameDisplay() {
                         <TableCell
                           className={
                             result.resortName === currentResort.folderName
-                              ? "bg-green-100 dark:bg-green-900/30 font-medium"
-                              : "bg-red-100 dark:bg-red-900/30"
+                              ? "bg-green-200 text-green-800 dark:bg-green-700/60 dark:text-green-100 font-medium"
+                              : "bg-red-200 text-red-800 dark:bg-red-700/60 dark:text-red-100"
                           }
                         >
                           {formatResortName(result.resortName)}
@@ -502,8 +502,8 @@ export function GameDisplay() {
                               result.metadata.country,
                               metadata.country
                             )
-                              ? "bg-green-100 dark:bg-green-900/30"
-                              : "bg-red-100 dark:bg-red-900/30"
+                              ? "bg-green-200 text-green-800 dark:bg-green-700/60 dark:text-green-100"
+                              : "bg-red-200 text-red-800 dark:bg-red-700/60 dark:text-red-100"
                           }
                         >
                           {result.metadata?.country || "Unknown"}
@@ -515,8 +515,8 @@ export function GameDisplay() {
                               result.metadata.region,
                               metadata.region
                             )
-                              ? "bg-green-100 dark:bg-green-900/30"
-                              : "bg-red-100 dark:bg-red-900/30"
+                              ? "bg-green-200 text-green-800 dark:bg-green-700/60 dark:text-green-100"
+                              : "bg-red-200 text-red-800 dark:bg-red-700/60 dark:text-red-100"
                           }
                         >
                           {result.metadata?.region || "Unknown"}
@@ -528,8 +528,8 @@ export function GameDisplay() {
                               result.metadata.parent_company,
                               metadata.parent_company
                             )
-                              ? "bg-green-100 dark:bg-green-900/30"
-                              : "bg-red-100 dark:bg-red-900/30"
+                              ? "bg-green-200 text-green-800 dark:bg-green-700/60 dark:text-green-100"
+                              : "bg-red-200 text-red-800 dark:bg-red-700/60 dark:text-red-100"
                           }
                         >
                           {result.metadata?.parent_company || "Unknown"}
