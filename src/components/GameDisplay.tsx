@@ -8,6 +8,16 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Separator } from "./ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
 import {
   getAllSkiResorts,
   getSkiResortRedactedImageUrl,
@@ -36,6 +46,7 @@ export function GameDisplay() {
   const [resortMetadataMap, setResortMetadataMap] = useState<
     Record<string, SkiResortMetadata>
   >({});
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   useEffect(() => {
     const loadGame = async () => {
@@ -149,7 +160,10 @@ export function GameDisplay() {
   if (error) {
     return (
       <div className="flex flex-col justify-center items-center">
-        <p className="text-red-500 mb-4">{error}</p>
+        <Alert variant="destructive" className="mb-4 max-w-md">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
         <button
           onClick={handleNewGame}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -172,7 +186,49 @@ export function GameDisplay() {
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader className="text-2xl font-bold text-center">
-        Guess the Ski Resort
+        <div className="flex justify-between items-center">
+          <h2>Guess the Ski Resort</h2>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild>
+              <button className="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200">
+                How to Play
+              </button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>How to Play Ski-O-Guessr</SheetTitle>
+                <SheetDescription>
+                  Test your knowledge of ski resorts around the world!
+                </SheetDescription>
+              </SheetHeader>
+              <div className="py-4">
+                <h3 className="font-medium text-lg mb-2">Game Rules:</h3>
+                <ol className="list-decimal pl-5 space-y-2">
+                  <li>You'll be shown a redacted ski resort map.</li>
+                  <li>
+                    Select a resort from the dropdown and submit your guess.
+                  </li>
+                  <li>
+                    Green cells indicate correct information, red cells indicate
+                    incorrect information.
+                  </li>
+                  <li>
+                    Keep guessing until you identify the correct resort or run
+                    out of options.
+                  </li>
+                  <li>
+                    The full map will be revealed when you guess correctly.
+                  </li>
+                </ol>
+                <Separator className="my-4" />
+                <p className="text-sm text-gray-500">
+                  Tip: Pay attention to the layout of the trails and lifts to
+                  help identify the resort.
+                </p>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="mb-6">
@@ -189,9 +245,12 @@ export function GameDisplay() {
 
         {guessedCorrectly ? (
           <div className="text-center mb-6">
-            <h3 className="text-xl font-bold text-green-600 mb-2">
-              Correct! This is {metadata.name}
-            </h3>
+            <Alert className="mb-4 border-green-200 bg-green-50">
+              <AlertTitle className="text-green-800">Correct!</AlertTitle>
+              <AlertDescription className="text-green-700">
+                You've successfully identified {metadata.name}.
+              </AlertDescription>
+            </Alert>
             <p className="mb-4">
               <span className="font-medium">Country:</span> {metadata.country} |
               <span className="font-medium"> Region:</span> {metadata.region} |
@@ -242,81 +301,89 @@ export function GameDisplay() {
             </div>
 
             {guessResults.length > 0 && (
-              <div className="mb-6 overflow-x-auto">
-                <h3 className="font-semibold text-lg mb-2">Your Guesses:</h3>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Resort</TableHead>
-                      <TableHead>Country</TableHead>
-                      <TableHead>Region</TableHead>
-                      <TableHead>Parent Company</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {guessResults.map((result, index) => (
-                      <TableRow key={index}>
-                        <TableCell
-                          className={
-                            result.resortName === currentResort.folderName
-                              ? "bg-green-100"
-                              : "bg-red-100"
-                          }
-                        >
-                          {formatResortName(result.resortName)}
-                        </TableCell>
-                        <TableCell
-                          className={
-                            result.metadata &&
-                            isMatchingField(
-                              result.metadata.country,
-                              metadata.country
-                            )
-                              ? "bg-green-100"
-                              : "bg-red-100"
-                          }
-                        >
-                          {result.metadata?.country || "Unknown"}
-                        </TableCell>
-                        <TableCell
-                          className={
-                            result.metadata &&
-                            isMatchingField(
-                              result.metadata.region,
-                              metadata.region
-                            )
-                              ? "bg-green-100"
-                              : "bg-red-100"
-                          }
-                        >
-                          {result.metadata?.region || "Unknown"}
-                        </TableCell>
-                        <TableCell
-                          className={
-                            result.metadata &&
-                            isMatchingField(
-                              result.metadata.parent_company,
-                              metadata.parent_company
-                            )
-                              ? "bg-green-100"
-                              : "bg-red-100"
-                          }
-                        >
-                          {result.metadata?.parent_company || "Unknown"}
-                        </TableCell>
+              <div className="mb-6">
+                <div className="flex items-center mb-2">
+                  <h3 className="font-semibold text-lg">Your Guesses</h3>
+                  <Separator className="flex-grow ml-3" />
+                </div>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Resort</TableHead>
+                        <TableHead>Country</TableHead>
+                        <TableHead>Region</TableHead>
+                        <TableHead>Parent Company</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {guessResults.map((result, index) => (
+                        <TableRow key={index}>
+                          <TableCell
+                            className={
+                              result.resortName === currentResort.folderName
+                                ? "bg-green-100"
+                                : "bg-red-100"
+                            }
+                          >
+                            {formatResortName(result.resortName)}
+                          </TableCell>
+                          <TableCell
+                            className={
+                              result.metadata &&
+                              isMatchingField(
+                                result.metadata.country,
+                                metadata.country
+                              )
+                                ? "bg-green-100"
+                                : "bg-red-100"
+                            }
+                          >
+                            {result.metadata?.country || "Unknown"}
+                          </TableCell>
+                          <TableCell
+                            className={
+                              result.metadata &&
+                              isMatchingField(
+                                result.metadata.region,
+                                metadata.region
+                              )
+                                ? "bg-green-100"
+                                : "bg-red-100"
+                            }
+                          >
+                            {result.metadata?.region || "Unknown"}
+                          </TableCell>
+                          <TableCell
+                            className={
+                              result.metadata &&
+                              isMatchingField(
+                                result.metadata.parent_company,
+                                metadata.parent_company
+                              )
+                                ? "bg-green-100"
+                                : "bg-red-100"
+                            }
+                          >
+                            {result.metadata?.parent_company || "Unknown"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             )}
 
             {availableResorts.length === 0 && !guessedCorrectly && (
               <div className="text-center mb-6">
-                <p className="text-red-500 mb-2">
-                  You've used all available guesses!
-                </p>
-                <p className="mb-4">The correct answer was: {metadata.name}</p>
+                <Alert variant="destructive" className="mb-4">
+                  <AlertTitle>Game Over</AlertTitle>
+                  <AlertDescription>
+                    You've used all available guesses! The correct answer was:{" "}
+                    {metadata.name}
+                  </AlertDescription>
+                </Alert>
                 <button
                   onClick={handleNewGame}
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
