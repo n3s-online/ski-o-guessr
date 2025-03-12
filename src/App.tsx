@@ -19,27 +19,17 @@ function App() {
 
         <footer className="mt-12 text-center text-gray-500 dark:text-gray-400 text-sm py-6 border-t border-gray-200 dark:border-gray-700">
           <div className="flex flex-col md:flex-row justify-center items-center gap-4">
-            <p>© {new Date().getFullYear()} Ski-O-Guessr</p>
-            <div className="flex gap-4">
+            <p>
+              Created with ❤️ by{" "}
               <a
-                href="#"
+                href="https://willness.dev"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               >
-                About
+                willness.dev
               </a>
-              <a
-                href="#"
-                className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-              >
-                Privacy
-              </a>
-              <a
-                href="#"
-                className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-              >
-                Contact
-              </a>
-            </div>
+            </p>
           </div>
         </footer>
       </div>
