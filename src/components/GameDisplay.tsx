@@ -25,6 +25,12 @@ import {
   SelectValue,
 } from "./ui/select";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
+import {
   getAllSkiResorts,
   getSkiResortRedactedImageUrl,
   getSkiResortImageUrl,
@@ -33,7 +39,8 @@ import {
   SkiResort,
 } from "../lib/ski-data";
 import { Button } from "./ui/button";
-import { Loader2, Info, RefreshCw } from "lucide-react";
+import { Loader2, Info, RefreshCw, Plus, Minus } from "lucide-react";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 // Define a type for guess results
 interface GuessResult {
@@ -56,6 +63,7 @@ export function GameDisplay() {
   >({});
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+  const [showZoomHint, setShowZoomHint] = useState(true);
 
   useEffect(() => {
     const loadGame = async () => {
@@ -97,6 +105,17 @@ export function GameDisplay() {
     loadGame();
   }, []);
 
+  // Hide zoom hint after 5 seconds
+  useEffect(() => {
+    if (!loading && showZoomHint) {
+      const timer = setTimeout(() => {
+        setShowZoomHint(false);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [loading, showZoomHint]);
+
   const handleGuess = async () => {
     if (!selectedResort || !currentResort || !metadata) return;
 
@@ -130,6 +149,7 @@ export function GameDisplay() {
     setGuessResults([]);
     setSelectedResort("");
     setImageLoading(true);
+    setShowZoomHint(true);
 
     try {
       const allResorts = getAllSkiResorts();
@@ -245,9 +265,15 @@ export function GameDisplay() {
                 </ol>
                 <Separator className="my-6" />
                 <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
-                  <p className="text-sm text-blue-800 dark:text-blue-300">
+                  <p className="text-sm text-blue-800 dark:text-blue-300 mb-2">
                     <strong>Tip:</strong> Pay attention to the layout of the
                     trails and lifts to help identify the resort.
+                  </p>
+                  <p className="text-sm text-blue-800 dark:text-blue-300">
+                    <strong>Zoom Feature:</strong> Use the zoom controls in the
+                    top-right corner of the map to zoom in/out or reset the
+                    view. You can also use your mouse wheel or pinch gestures on
+                    mobile.
                   </p>
                 </div>
               </div>
@@ -258,20 +284,96 @@ export function GameDisplay() {
 
       <div className="mb-8 relative rounded-xl overflow-hidden shadow-lg bg-gray-100 dark:bg-gray-700 max-w-full">
         {imageLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-70">
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-70 z-10">
             <Loader2 className="h-12 w-12 text-blue-600 animate-spin" />
           </div>
         )}
-        <img
-          src={
-            guessedCorrectly
-              ? getSkiResortImageUrl(currentResort.folderName)
-              : getSkiResortRedactedImageUrl(currentResort.folderName)
-          }
-          alt="Ski resort map"
-          className="w-full h-auto"
-          onLoad={() => setImageLoading(false)}
-        />
+        <TransformWrapper
+          initialScale={1}
+          minScale={0.5}
+          maxScale={4}
+          wheel={{ step: 0.1 }}
+          centerOnInit={true}
+          doubleClick={{ disabled: false, mode: "reset" }}
+        >
+          {({ zoomIn, zoomOut, resetTransform }) => (
+            <>
+              <div className="absolute top-2 right-2 z-10 flex gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => zoomIn()}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Zoom In</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => zoomOut()}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Zoom Out</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => resetTransform()}
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Reset View</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <TransformComponent wrapperClass="w-full h-full">
+                <img
+                  src={
+                    guessedCorrectly
+                      ? getSkiResortImageUrl(currentResort.folderName)
+                      : getSkiResortRedactedImageUrl(currentResort.folderName)
+                  }
+                  alt="Ski resort map"
+                  className="w-full h-auto"
+                  onLoad={() => setImageLoading(false)}
+                  draggable="false"
+                />
+              </TransformComponent>
+
+              {showZoomHint && !imageLoading && (
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm animate-pulse">
+                  <p className="flex items-center gap-2">
+                    <Plus className="h-3 w-3" /> Zoom in to see details
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+        </TransformWrapper>
       </div>
 
       {guessedCorrectly ? (
