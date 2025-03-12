@@ -282,7 +282,7 @@ export function GameDisplay() {
         </div>
       </div>
 
-      <div className="mb-8 relative rounded-xl overflow-hidden shadow-lg bg-gray-100 dark:bg-gray-700 max-w-full">
+      <div className="mb-8 relative rounded-xl overflow-hidden shadow-lg bg-gray-100 dark:bg-gray-700 max-w-full max-h-[700px] min-h-[300px] flex items-center justify-center">
         {imageLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-70 z-10">
             <Loader2 className="h-12 w-12 text-blue-600 animate-spin" />
@@ -294,6 +294,7 @@ export function GameDisplay() {
           maxScale={4}
           wheel={{ step: 0.1 }}
           centerOnInit={true}
+          limitToBounds={true}
           doubleClick={{ disabled: false, mode: "reset" }}
         >
           {({ zoomIn, zoomOut, resetTransform }) => (
@@ -350,7 +351,7 @@ export function GameDisplay() {
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <TransformComponent wrapperClass="w-full h-full">
+              <TransformComponent wrapperClass="w-full h-full max-h-[70vh] overflow-hidden flex items-center justify-center">
                 <img
                   src={
                     guessedCorrectly
@@ -358,7 +359,7 @@ export function GameDisplay() {
                       : getSkiResortRedactedImageUrl(currentResort.folderName)
                   }
                   alt="Ski resort map"
-                  className="w-full h-auto"
+                  className="max-w-full max-h-[70vh] object-contain"
                   onLoad={() => setImageLoading(false)}
                   draggable="false"
                 />
