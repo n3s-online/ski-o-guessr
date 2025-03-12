@@ -39,7 +39,15 @@ import {
   SkiResort,
 } from "../lib/ski-data";
 import { Button } from "./ui/button";
-import { Loader2, Info, RefreshCw, Plus, Minus } from "lucide-react";
+import {
+  Loader2,
+  Info,
+  RefreshCw,
+  Plus,
+  Minus,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 // Define a type for guess results
@@ -569,6 +577,36 @@ export function GameDisplay() {
                           }
                         >
                           {result.metadata?.skiable_acreage || "Unknown"}
+                          {result.metadata &&
+                            metadata &&
+                            result.metadata.skiable_acreage !==
+                              metadata.skiable_acreage &&
+                            result.metadata.skiable_acreage !== undefined && (
+                              <span className="ml-2 inline-flex items-center">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span>
+                                        {result.metadata.skiable_acreage >
+                                        metadata.skiable_acreage ? (
+                                          <ArrowDown className="h-4 w-4" />
+                                        ) : (
+                                          <ArrowUp className="h-4 w-4" />
+                                        )}
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>
+                                        {result.metadata.skiable_acreage >
+                                        metadata.skiable_acreage
+                                          ? "Too high"
+                                          : "Too low"}
+                                      </p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </span>
+                            )}
                         </TableCell>
                         <TableCell
                           className={
@@ -579,6 +617,34 @@ export function GameDisplay() {
                           }
                         >
                           {result.metadata?.lifts || "Unknown"}
+                          {result.metadata &&
+                            metadata &&
+                            result.metadata.lifts !== metadata.lifts &&
+                            result.metadata.lifts !== undefined && (
+                              <span className="ml-2 inline-flex items-center">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span>
+                                        {result.metadata.lifts >
+                                        metadata.lifts ? (
+                                          <ArrowDown className="h-4 w-4" />
+                                        ) : (
+                                          <ArrowUp className="h-4 w-4" />
+                                        )}
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>
+                                        {result.metadata.lifts > metadata.lifts
+                                          ? "Too high"
+                                          : "Too low"}
+                                      </p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </span>
+                            )}
                         </TableCell>
                         <TableCell
                           className={
