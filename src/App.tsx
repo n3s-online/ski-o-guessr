@@ -1,8 +1,11 @@
+import { Card, CardContent, CardHeader } from "./components/ui/card";
+
 function App() {
   return (
-    <div className="container bg-red-500">
-      <h1>Hello World</h1>
-    </div>
+    <Card>
+      <CardHeader>Ski-O-Guessr</CardHeader>
+      <CardContent>App</CardContent>
+    </Card>
   );
 }
 
