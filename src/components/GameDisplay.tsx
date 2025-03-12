@@ -18,6 +18,13 @@ import {
   SheetTrigger,
 } from "./ui/sheet";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import {
   getAllSkiResorts,
   getSkiResortRedactedImageUrl,
   getSkiResortImageUrl,
@@ -25,6 +32,7 @@ import {
   SkiResortMetadata,
   SkiResort,
 } from "../lib/ski-data";
+import { Button } from "./ui/button";
 
 // Define a type for guess results
 interface GuessResult {
@@ -185,13 +193,11 @@ export function GameDisplay() {
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="text-center mb-6">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-col justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Guess the Ski Resort</h2>
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
-              <button className="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200">
-                How to Play
-              </button>
+              <Button variant="outline">How to Play</Button>
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
@@ -270,29 +276,36 @@ export function GameDisplay() {
               <label htmlFor="resort-select" className="block mb-2 font-medium">
                 Select a ski resort:
               </label>
-              <select
-                id="resort-select"
-                value={selectedResort}
-                onChange={(e) => setSelectedResort(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded"
-                disabled={availableResorts.length === 0 || guessedCorrectly}
-              >
-                <option value="">-- Select a resort --</option>
-                {availableResorts.map((resort) => (
-                  <option key={resort.folderName} value={resort.folderName}>
-                    {formatResortName(resort.folderName)}
-                  </option>
-                ))}
-              </select>
+              <div className="w-full">
+                <Select
+                  value={selectedResort}
+                  onValueChange={setSelectedResort}
+                  disabled={availableResorts.length === 0 || guessedCorrectly}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="-- Select a resort --" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableResorts.map((resort) => (
+                      <SelectItem
+                        key={resort.folderName}
+                        value={resort.folderName}
+                      >
+                        {formatResortName(resort.folderName)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="flex items-end">
-              <button
+              <Button
                 onClick={handleGuess}
                 disabled={!selectedResort || guessedCorrectly}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                variant="outline"
               >
                 Submit Guess
-              </button>
+              </Button>
             </div>
           </div>
 
