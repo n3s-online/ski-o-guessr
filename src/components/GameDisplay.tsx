@@ -31,15 +31,7 @@ import {
   SkiResort,
 } from "../lib/ski-data";
 import { Button } from "./ui/button";
-import {
-  Loader2,
-  Info,
-  RefreshCw,
-  Plus,
-  Minus,
-  ArrowUp,
-  ArrowDown,
-} from "lucide-react";
+import { Loader2, Info, RefreshCw, Plus, Minus } from "lucide-react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { GuessesTable } from "./GuessesTable";
 import { GuessResult } from "../types/game";
