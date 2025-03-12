@@ -407,6 +407,24 @@ export function GameDisplay() {
               </div>
               <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
                 <span className="font-medium block text-sm text-gray-500 dark:text-gray-400">
+                  Continent
+                </span>
+                <span className="text-lg">{metadata.continent}</span>
+              </div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                <span className="font-medium block text-sm text-gray-500 dark:text-gray-400">
+                  Acreage
+                </span>
+                <span className="text-lg">{metadata.skiable_acreage}</span>
+              </div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                <span className="font-medium block text-sm text-gray-500 dark:text-gray-400">
+                  Lifts
+                </span>
+                <span className="text-lg">{metadata.lifts}</span>
+              </div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                <span className="font-medium block text-sm text-gray-500 dark:text-gray-400">
                   Parent Company
                 </span>
                 <span className="text-lg">{metadata.parent_company}</span>
@@ -479,6 +497,9 @@ export function GameDisplay() {
                       <TableHead className="font-semibold">Resort</TableHead>
                       <TableHead className="font-semibold">Country</TableHead>
                       <TableHead className="font-semibold">Region</TableHead>
+                      <TableHead className="font-semibold">Continent</TableHead>
+                      <TableHead className="font-semibold">Acreage</TableHead>
+                      <TableHead className="font-semibold">Lifts</TableHead>
                       <TableHead className="font-semibold">
                         Parent Company
                       </TableHead>
@@ -524,6 +545,40 @@ export function GameDisplay() {
                           }
                         >
                           {result.metadata?.region || "Unknown"}
+                        </TableCell>
+                        <TableCell
+                          className={
+                            result.metadata &&
+                            isMatchingField(
+                              result.metadata.continent,
+                              metadata.continent
+                            )
+                              ? "bg-green-200 text-green-800 dark:bg-green-700/60 dark:text-green-100"
+                              : "bg-red-200 text-red-800 dark:bg-red-700/60 dark:text-red-100"
+                          }
+                        >
+                          {result.metadata?.continent || "Unknown"}
+                        </TableCell>
+                        <TableCell
+                          className={
+                            result.metadata &&
+                            result.metadata.skiable_acreage ===
+                              metadata.skiable_acreage
+                              ? "bg-green-200 text-green-800 dark:bg-green-700/60 dark:text-green-100"
+                              : "bg-red-200 text-red-800 dark:bg-red-700/60 dark:text-red-100"
+                          }
+                        >
+                          {result.metadata?.skiable_acreage || "Unknown"}
+                        </TableCell>
+                        <TableCell
+                          className={
+                            result.metadata &&
+                            result.metadata.lifts === metadata.lifts
+                              ? "bg-green-200 text-green-800 dark:bg-green-700/60 dark:text-green-100"
+                              : "bg-red-200 text-red-800 dark:bg-red-700/60 dark:text-red-100"
+                          }
+                        >
+                          {result.metadata?.lifts || "Unknown"}
                         </TableCell>
                         <TableCell
                           className={
