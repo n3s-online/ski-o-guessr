@@ -9,7 +9,8 @@ export function generateShareText(
   guessResults: GuessResult[],
   currentResortMetadata: SkiResortMetadata,
   guessedCorrectly: boolean,
-  currentResortFolderName: string
+  currentResortFolderName: string,
+  showCountryNames: boolean
 ): string {
   // Get the puzzle number (days since game start)
   const puzzleNumber = getDaysSinceGameStart() + 1;
@@ -28,14 +29,16 @@ export function generateShareText(
     }
 
     // Country match
-    if (
-      guess.metadata?.country &&
-      guess.metadata.country.toLowerCase() ===
-        currentResortMetadata.country.toLowerCase()
-    ) {
-      shareText += "🟩 "; // Green for correct country
-    } else {
-      shareText += "🟥 "; // Red for incorrect country
+    if (showCountryNames) {
+      if (
+        guess.metadata?.country &&
+        guess.metadata.country.toLowerCase() ===
+          currentResortMetadata.country.toLowerCase()
+      ) {
+        shareText += "🟩 "; // Green for correct country
+      } else {
+        shareText += "🟥 "; // Red for incorrect country
+      }
     }
 
     // Region match

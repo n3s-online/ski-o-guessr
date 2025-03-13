@@ -91,6 +91,8 @@ export function GameDisplay() {
   const transformComponentRef = useRef(null);
   const timerRef = useRef<number | null>(null);
 
+  const [showCountryNames, setShowCountryNames] = useState<boolean>(false);
+
   // Define the loadGame function
   const loadGame = async () => {
     try {
@@ -318,11 +320,43 @@ export function GameDisplay() {
     }
   };
 
+  // Load settings from localStorage
+  useEffect(() => {
+    const loadSettings = () => {
+      const savedSettings = localStorage.getItem("ski-o-guessr-settings");
+      if (savedSettings) {
+        try {
+          const parsedSettings = JSON.parse(savedSettings);
+          if (typeof parsedSettings.showCountryNames === "boolean") {
+            setShowCountryNames(parsedSettings.showCountryNames);
+          }
+        } catch (error) {
+          console.error("Failed to parse settings from localStorage:", error);
+        }
+      }
+    };
+
+    loadSettings();
+    // Listen for settings changes from other components
+    window.addEventListener("settingsChanged", loadSettings);
+    return () => window.removeEventListener("settingsChanged", loadSettings);
+  }, []);
+
   // Function to format resort name for display
-  const formatResortName = (folderName: string): string => {
-    return folderName
+  const formatResortName = (
+    folderName: string,
+    includeCountry: boolean = false
+  ): string => {
+    const name = folderName
       .replace(/-/g, " ")
       .replace(/\b\w/g, (l) => l.toUpperCase());
+
+    if (includeCountry && showCountryNames) {
+      const metadata = resortMetadataMap[folderName];
+      return metadata ? `${name}, ${metadata.country}` : name;
+    }
+
+    return name;
   };
 
   // Function to check if a metadata field matches the current resort
@@ -354,7 +388,8 @@ export function GameDisplay() {
       guessResults,
       metadata,
       guessedCorrectly,
-      currentResort.folderName
+      currentResort.folderName,
+      showCountryNames
     );
     const success = await copyToClipboard(shareText);
 
@@ -429,88 +464,82 @@ export function GameDisplay() {
 
   return (
     <div className="flex flex-col space-y-6">
-      {/* Daily puzzle info */}
-      <div className="flex flex-col sm:flex-row justify-between items-center bg-blue-50 dark:bg-gray-800 p-4 rounded-lg">
-        <div className="text-center sm:text-left mb-3 sm:mb-0">
-          <h2 className="text-lg font-semibold text-blue-800 dark:text-blue-400">
-            Daily Puzzle
-          </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            {currentDate}
-          </p>
+      {/* Combined game header */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-blue-50 dark:bg-gray-800 p-4 rounded-lg">
+        <div className="flex items-center gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-blue-800 dark:text-blue-400">
+              Daily Puzzle
+            </h2>
+            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300 mt-1">
+              <p className="text-sm">{currentDate}</p>
+              <span className="text-gray-400">•</span>
+              <div className="flex items-center gap-1 text-sm">
+                <Clock className="h-3 w-3" />
+                <span className="font-mono">
+                  {timeUntilReset.hours.toString().padStart(2, "0")}:
+                  {timeUntilReset.minutes.toString().padStart(2, "0")}:
+                  {timeUntilReset.seconds.toString().padStart(2, "0")}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
-          <Clock className="h-4 w-4" />
-          <span className="text-sm font-mono">
-            Next puzzle in: {timeUntilReset.hours.toString().padStart(2, "0")}:
-            {timeUntilReset.minutes.toString().padStart(2, "0")}:
-            {timeUntilReset.seconds.toString().padStart(2, "0")}
-          </span>
-        </div>
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Info className="h-4 w-4" />
+              How to Play
+            </Button>
+          </SheetTrigger>
+          <SheetContent className="overflow-y-auto p-2">
+            <SheetHeader>
+              <SheetTitle className="text-2xl text-blue-800 dark:text-blue-400">
+                How to Play Ski-O-Guessr
+              </SheetTitle>
+              <SheetDescription className="text-lg">
+                Test your knowledge of ski resorts around the world!
+              </SheetDescription>
+            </SheetHeader>
+            <div className="py-6">
+              <h3 className="font-medium text-xl mb-3">Game Rules:</h3>
+              <ol className="list-decimal pl-6 space-y-3">
+                <li>You'll be shown a portion of a ski resort map.</li>
+                <li>
+                  Select a resort from the dropdown and submit your guess.
+                </li>
+                <li>
+                  Green cells indicate correct information, red cells indicate
+                  incorrect information.
+                </li>
+                <li>After each guess, more of the map will be revealed.</li>
+                <li>
+                  Keep guessing until you identify the correct resort or run out
+                  of options.
+                </li>
+                <li>
+                  The full map will be revealed when you guess correctly or
+                  after your second guess.
+                </li>
+              </ol>
+              <Separator className="my-6" />
+              <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-300 mb-2">
+                  <strong>Tip:</strong> Pay attention to the layout of the
+                  trails and lifts to help identify the resort.
+                </p>
+                <p className="text-sm text-blue-800 dark:text-blue-300">
+                  <strong>Zoom Feature:</strong> Use the zoom controls in the
+                  top-right corner of the map to zoom in/out or reset the view.
+                  You can also use your mouse wheel or pinch gestures on mobile.
+                </p>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
 
       <div className="w-full max-w-5xl mx-auto">
-        <div className="text-center mb-6">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-blue-800 dark:text-blue-400">
-              Guess the Ski Resort
-            </h2>
-            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Info className="h-4 w-4" />
-                  How to Play
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="overflow-y-auto p-2">
-                <SheetHeader>
-                  <SheetTitle className="text-2xl text-blue-800 dark:text-blue-400">
-                    How to Play Ski-O-Guessr
-                  </SheetTitle>
-                  <SheetDescription className="text-lg">
-                    Test your knowledge of ski resorts around the world!
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="py-6">
-                  <h3 className="font-medium text-xl mb-3">Game Rules:</h3>
-                  <ol className="list-decimal pl-6 space-y-3">
-                    <li>You'll be shown a portion of a ski resort map.</li>
-                    <li>
-                      Select a resort from the dropdown and submit your guess.
-                    </li>
-                    <li>
-                      Green cells indicate correct information, red cells
-                      indicate incorrect information.
-                    </li>
-                    <li>After each guess, more of the map will be revealed.</li>
-                    <li>
-                      Keep guessing until you identify the correct resort or run
-                      out of options.
-                    </li>
-                    <li>
-                      The full map will be revealed when you guess correctly or
-                      after your second guess.
-                    </li>
-                  </ol>
-                  <Separator className="my-6" />
-                  <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
-                    <p className="text-sm text-blue-800 dark:text-blue-300 mb-2">
-                      <strong>Tip:</strong> Pay attention to the layout of the
-                      trails and lifts to help identify the resort.
-                    </p>
-                    <p className="text-sm text-blue-800 dark:text-blue-300">
-                      <strong>Zoom Feature:</strong> Use the zoom controls in
-                      the top-right corner of the map to zoom in/out or reset
-                      the view. You can also use your mouse wheel or pinch
-                      gestures on mobile.
-                    </p>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-
         <div className="mb-8 relative rounded-xl overflow-hidden shadow-lg bg-gray-100 dark:bg-gray-700 max-w-full max-h-[700px] min-h-[300px] flex items-center justify-center">
           {imageLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-70 z-10">
@@ -728,7 +757,7 @@ export function GameDisplay() {
                           key={resort.folderName}
                           value={resort.folderName}
                         >
-                          {formatResortName(resort.folderName)}
+                          {formatResortName(resort.folderName, true)}
                         </SelectItem>
                       ))}
                     </SelectContent>
