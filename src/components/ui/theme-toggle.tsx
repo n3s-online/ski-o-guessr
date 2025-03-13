@@ -1,27 +1,50 @@
-import { Moon, Sun, Monitor } from "lucide-react";
-import { useTheme } from "./theme-provider";
+import { useState, useEffect } from "react";
+import { Moon, Sun } from "lucide-react";
 import { Button } from "./button";
 
+const STORAGE_KEY = "ski-o-guessr-theme";
+
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const [isDark, setIsDark] = useState<boolean>(false);
+
+  // Load theme from localStorage and set initial theme
+  useEffect(() => {
+    const loadTheme = () => {
+      const savedTheme = localStorage.getItem(STORAGE_KEY);
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+
+      let newIsDark: boolean;
+      if (savedTheme) {
+        newIsDark = savedTheme === "dark";
+      } else {
+        newIsDark = prefersDark;
+      }
+
+      setIsDark(newIsDark);
+      document.documentElement.classList.toggle("dark", newIsDark);
+    };
+
+    loadTheme();
+  }, []);
+
+  const toggleTheme = () => {
+    const newIsDark = !isDark;
+    setIsDark(newIsDark);
+    document.documentElement.classList.toggle("dark", newIsDark);
+    localStorage.setItem(STORAGE_KEY, newIsDark ? "dark" : "light");
+  };
 
   return (
-    <div className="flex items-center space-x-2">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() =>
-          setTheme(
-            theme === "light" ? "dark" : theme === "dark" ? "system" : "light"
-          )
-        }
-        title={`Current theme: ${theme}. Click to switch.`}
-      >
-        {theme === "light" && <Sun className="h-5 w-5" />}
-        {theme === "dark" && <Moon className="h-5 w-5" />}
-        {theme === "system" && <Monitor className="h-5 w-5" />}
-        <span className="sr-only">Toggle theme</span>
-      </Button>
-    </div>
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleTheme}
+      title={isDark ? "Switch to light theme" : "Switch to dark theme"}
+    >
+      {!isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+      <span className="sr-only">Toggle theme</span>
+    </Button>
   );
 }
