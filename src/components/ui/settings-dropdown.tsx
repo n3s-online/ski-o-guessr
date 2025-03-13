@@ -12,8 +12,14 @@ import {
 
 const STORAGE_KEY = "ski-o-guessr-settings";
 
+export interface AppSettings {
+  showCountryNames: boolean;
+  useMetricUnits: boolean;
+}
+
 export function SettingsDropdown() {
   const [showCountryNames, setShowCountryNames] = useState<boolean>(false);
+  const [useMetricUnits, setUseMetricUnits] = useState<boolean>(false);
 
   useEffect(() => {
     const savedSettings = localStorage.getItem(STORAGE_KEY);
@@ -23,20 +29,35 @@ export function SettingsDropdown() {
         if (typeof parsedSettings.showCountryNames === "boolean") {
           setShowCountryNames(parsedSettings.showCountryNames);
         }
+        if (typeof parsedSettings.useMetricUnits === "boolean") {
+          setUseMetricUnits(parsedSettings.useMetricUnits);
+        }
       } catch (error) {
         console.error("Failed to parse settings from localStorage:", error);
       }
     }
   }, []);
 
-  const handleShowCountryNamesChange = (checked: boolean) => {
-    setShowCountryNames(checked);
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ showCountryNames: checked })
-    );
+  const saveSettings = (settings: Partial<AppSettings>) => {
+    const currentSettings: AppSettings = {
+      showCountryNames,
+      useMetricUnits,
+      ...settings,
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(currentSettings));
     // Dispatch a custom event to notify other components
     window.dispatchEvent(new CustomEvent("settingsChanged"));
+  };
+
+  const handleShowCountryNamesChange = (checked: boolean) => {
+    setShowCountryNames(checked);
+    saveSettings({ showCountryNames: checked });
+  };
+
+  const handleUseMetricUnitsChange = (checked: boolean) => {
+    setUseMetricUnits(checked);
+    saveSettings({ useMetricUnits: checked });
   };
 
   return (
@@ -55,6 +76,12 @@ export function SettingsDropdown() {
           onCheckedChange={handleShowCountryNamesChange}
         >
           Show country names
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
+          checked={useMetricUnits}
+          onCheckedChange={handleUseMetricUnitsChange}
+        >
+          Use metric units (km)
         </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>

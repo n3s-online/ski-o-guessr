@@ -13,6 +13,8 @@ export interface SkiResortMetadata {
   continent: string;
   skiable_acreage: number;
   lifts: number;
+  latitude: number;
+  longitude: number;
   boxes: number[][];
 }
 

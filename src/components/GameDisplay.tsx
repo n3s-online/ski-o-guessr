@@ -92,6 +92,7 @@ export function GameDisplay() {
   const timerRef = useRef<number | null>(null);
 
   const [showCountryNames, setShowCountryNames] = useState<boolean>(false);
+  const [useMetricUnits, setUseMetricUnits] = useState<boolean>(false);
 
   // Define the loadGame function
   const loadGame = async () => {
@@ -318,26 +319,33 @@ export function GameDisplay() {
     }
   };
 
-  // Load settings from localStorage
+  // Listen for settings changes
   useEffect(() => {
-    const loadSettings = () => {
-      const savedSettings = localStorage.getItem("ski-o-guessr-settings");
-      if (savedSettings) {
+    const handleSettingsChange = () => {
+      const settingsStr = localStorage.getItem("ski-o-guessr-settings");
+      if (settingsStr) {
         try {
-          const parsedSettings = JSON.parse(savedSettings);
-          if (typeof parsedSettings.showCountryNames === "boolean") {
-            setShowCountryNames(parsedSettings.showCountryNames);
+          const settings = JSON.parse(settingsStr);
+          if (typeof settings.showCountryNames === "boolean") {
+            setShowCountryNames(settings.showCountryNames);
+          }
+          if (typeof settings.useMetricUnits === "boolean") {
+            setUseMetricUnits(settings.useMetricUnits);
           }
         } catch (error) {
-          console.error("Failed to parse settings from localStorage:", error);
+          console.error("Failed to parse settings:", error);
         }
       }
     };
 
-    loadSettings();
-    // Listen for settings changes from other components
-    window.addEventListener("settingsChanged", loadSettings);
-    return () => window.removeEventListener("settingsChanged", loadSettings);
+    // Initial load
+    handleSettingsChange();
+
+    // Listen for changes
+    window.addEventListener("settingsChanged", handleSettingsChange);
+    return () => {
+      window.removeEventListener("settingsChanged", handleSettingsChange);
+    };
   }, []);
 
   // Function to format resort name for display
@@ -386,7 +394,8 @@ export function GameDisplay() {
       guessResults,
       metadata,
       currentResort.folderName,
-      showCountryNames
+      showCountryNames,
+      useMetricUnits
     );
     const success = await copyToClipboard(shareText);
 

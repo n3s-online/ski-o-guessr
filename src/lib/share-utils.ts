@@ -1,6 +1,37 @@
 import { GuessResult } from "../types/game";
 import { SkiResortMetadata } from "./ski-data";
 import { getDaysSinceGameStart, getFormattedETDate } from "./time-utils";
+import {
+  calculateDistanceAndDirection,
+  formatDistance,
+} from "./distance-utils";
+
+/**
+ * Get direction emoji based on bearing
+ */
+function getDirectionEmoji(bearing: number): string {
+  // Convert bearing to 0-360 range
+  const normalizedBearing = ((bearing % 360) + 360) % 360;
+
+  // Map bearing to one of 8 directions with emojis
+  if (normalizedBearing >= 337.5 || normalizedBearing < 22.5) {
+    return "⬆️"; // North
+  } else if (normalizedBearing >= 22.5 && normalizedBearing < 67.5) {
+    return "↗️"; // Northeast
+  } else if (normalizedBearing >= 67.5 && normalizedBearing < 112.5) {
+    return "➡️"; // East
+  } else if (normalizedBearing >= 112.5 && normalizedBearing < 157.5) {
+    return "↘️"; // Southeast
+  } else if (normalizedBearing >= 157.5 && normalizedBearing < 202.5) {
+    return "⬇️"; // South
+  } else if (normalizedBearing >= 202.5 && normalizedBearing < 247.5) {
+    return "↙️"; // Southwest
+  } else if (normalizedBearing >= 247.5 && normalizedBearing < 292.5) {
+    return "⬅️"; // West
+  } else {
+    return "↖️"; // Northwest
+  }
+}
 
 /**
  * Generate an emojified version of the game results for sharing
@@ -9,7 +40,8 @@ export function generateShareText(
   guessResults: GuessResult[],
   currentResortMetadata: SkiResortMetadata,
   currentResortFolderName: string,
-  showCountryNames: boolean
+  showCountryNames: boolean,
+  useMetricUnits: boolean = false
 ): string {
   // Get the puzzle number (days since game start)
   const puzzleNumber = getDaysSinceGameStart() + 1;
@@ -101,6 +133,33 @@ export function generateShareText(
       shareText += "🟩"; // Green for correct parent company
     } else {
       shareText += "🟥"; // Red for incorrect parent company
+    }
+
+    // Add distance if coordinates are available
+    if (
+      guess.resortName !== currentResortFolderName && // Only show distance for incorrect guesses
+      guess.metadata?.latitude !== undefined &&
+      guess.metadata?.longitude !== undefined &&
+      currentResortMetadata?.latitude !== undefined &&
+      currentResortMetadata?.longitude !== undefined
+    ) {
+      const distanceInfo = calculateDistanceAndDirection(
+        currentResortMetadata.latitude,
+        currentResortMetadata.longitude,
+        guess.metadata.latitude,
+        guess.metadata.longitude
+      );
+
+      const distance = useMetricUnits
+        ? distanceInfo.distanceKm
+        : distanceInfo.distanceMiles;
+
+      const directionEmoji = getDirectionEmoji(distanceInfo.direction);
+
+      shareText += ` (${formatDistance(
+        distance,
+        useMetricUnits
+      )} ${directionEmoji})`;
     }
 
     shareText += "\n";
