@@ -52,3 +52,8 @@ export default tseslint.config({
   },
 })
 ```
+
+
+## Things to do before official launch
+- the 33% 66% numbers are incorrect. lets either correct these or change the copy to not indicate an exact percentage
+- add coordinates and give a distance away
