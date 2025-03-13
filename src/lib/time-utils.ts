@@ -63,6 +63,41 @@ export function shouldResetGame(lastPlayedDate: Date | null): boolean {
 }
 
 /**
+ * Get the days since game start
+ * @returns Number of days since the game started
+ */
+export function getDaysSinceGameStart(): number {
+  const midnightET = getMidnightETDate();
+  const millisecondsPerDay = 24 * 60 * 60 * 1000;
+  return Math.floor(
+    (midnightET.getTime() - GAME_START_DATE.getTime()) / millisecondsPerDay
+  );
+}
+
+/**
+ * Deterministically shuffle an array based on the day seed
+ * This ensures all users see the same shuffled order on the same day
+ * @param array The array to shuffle
+ * @returns A new array with the items shuffled in a deterministic order
+ */
+export function getShuffledArray<T>(array: T[]): T[] {
+  // Create a copy of the array to avoid modifying the original
+  const shuffled = [...array];
+  const daySeed = getDaysSinceGameStart();
+
+  // Use a simple but deterministic algorithm to shuffle the array
+  // Fisher-Yates shuffle with a deterministic random number generator
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    // Use the day seed and current index to generate a deterministic "random" index
+    const j = Math.floor((((daySeed * 31 + i * 17) % 101) / 100) * (i + 1));
+    // Swap elements
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled;
+}
+
+/**
  * Get the daily puzzle index based on days since game start
  * @param resortCount The total number of available resorts
  * @returns The index of today's puzzle
@@ -78,18 +113,6 @@ export function getDailyPuzzleIndex(resortCount: number): number {
 
   // Use modulo to cycle through available resorts
   return ((daysSinceStart % resortCount) + resortCount) % resortCount;
-}
-
-/**
- * Get the days since game start
- * @returns Number of days since the game started
- */
-export function getDaysSinceGameStart(): number {
-  const midnightET = getMidnightETDate();
-  const millisecondsPerDay = 24 * 60 * 60 * 1000;
-  return Math.floor(
-    (midnightET.getTime() - GAME_START_DATE.getTime()) / millisecondsPerDay
-  );
 }
 
 /**

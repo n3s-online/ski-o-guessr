@@ -1,5 +1,5 @@
 import skiData from "../assets/ski-data/index.json";
-import { getDailyPuzzleIndex } from "./time-utils";
+import { getDailyPuzzleIndex, getShuffledArray } from "./time-utils";
 
 export interface SkiResort {
   folderName: string;
@@ -31,11 +31,14 @@ export const getRandomSkiResort = (): SkiResort => {
 /**
  * Get the daily ski resort based on the current date in Eastern Time
  * This ensures all users get the same resort on the same day
+ * The resorts are deterministically shuffled to avoid alphabetical order
  */
 export const getDailySkiResort = (): SkiResort => {
   const { skiResorts } = skiData;
-  const dailyIndex = getDailyPuzzleIndex(skiResorts.length);
-  return skiResorts[dailyIndex];
+  // Shuffle the resorts array deterministically based on the day
+  const shuffledResorts = getShuffledArray(skiResorts);
+  const dailyIndex = getDailyPuzzleIndex(shuffledResorts.length);
+  return shuffledResorts[dailyIndex];
 };
 
 export const getSkiResortImageUrl = (folderName: string): string => {
