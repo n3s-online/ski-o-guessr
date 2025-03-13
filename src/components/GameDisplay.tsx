@@ -667,7 +667,9 @@ export function GameDisplay() {
                 Correct!
               </AlertTitle>
               <AlertDescription className="text-green-700 dark:text-green-300 mt-2 text-lg">
-                You've successfully identified {metadata.name}.
+                <div className="flex justify-center w-full">
+                  You've successfully identified {metadata.name}.
+                </div>
               </AlertDescription>
             </Alert>
             <div className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
@@ -794,7 +796,7 @@ export function GameDisplay() {
               <div className="text-center mb-8 px-2">
                 <Alert variant="destructive" className="mb-6">
                   <AlertTitle className="text-xl">Game Over</AlertTitle>
-                  <AlertDescription className="mt-2 text-lg">
+                  <AlertDescription className="mt-2 text-lg text-center">
                     You've used all available guesses! The correct answer was:{" "}
                     <span className="font-semibold">{metadata.name}</span>
                   </AlertDescription>
