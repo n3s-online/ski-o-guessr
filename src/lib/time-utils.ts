@@ -163,7 +163,7 @@ export function getTimeUntilReset(): {
 
 /**
  * Format the current date in ET for display
- * @returns Formatted date string (e.g., "March 12, 2024")
+ * @returns Formatted date string (e.g., "MM/DD/YYYY")
  */
 export function getFormattedETDate(): string {
   const etDate = getCurrentDateInET();
@@ -171,7 +171,7 @@ export function getFormattedETDate(): string {
   return new Intl.DateTimeFormat("en-US", {
     timeZone: "America/New_York",
     year: "numeric",
-    month: "long",
-    day: "numeric",
+    month: "2-digit",
+    day: "2-digit",
   }).format(etDate);
 }
