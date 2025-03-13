@@ -135,11 +135,11 @@ export function GameDisplay() {
           setCenterCoordinates(savedState.centerCoordinates);
         } else {
           // Fallback to daily resort if saved resort not found
-          initializeNewGame(allResorts, metadataMap);
+          initializeNewGame(metadataMap);
         }
       } else {
         // Initialize new game with daily resort
-        initializeNewGame(allResorts, metadataMap);
+        initializeNewGame(metadataMap);
       }
     } catch (err) {
       console.error("Error loading ski resort data:", err);
@@ -199,7 +199,6 @@ export function GameDisplay() {
 
   // Initialize a new game with the daily resort
   const initializeNewGame = (
-    allResorts: SkiResort[],
     metadataMap: Record<string, SkiResortMetadata>
   ) => {
     // Get the daily resort based on current date in ET
@@ -310,8 +309,7 @@ export function GameDisplay() {
     setRevealPercentage(33);
 
     try {
-      const allResorts = getAllSkiResorts();
-      initializeNewGame(allResorts, resortMetadataMap);
+      initializeNewGame(resortMetadataMap);
     } catch (err) {
       console.error("Error loading ski resort data:", err);
       setError("Failed to load ski resort data. Please try again.");
@@ -387,7 +385,6 @@ export function GameDisplay() {
     const shareText = generateShareText(
       guessResults,
       metadata,
-      guessedCorrectly,
       currentResort.folderName,
       showCountryNames
     );

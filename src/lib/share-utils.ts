@@ -8,7 +8,6 @@ import { getDaysSinceGameStart, getFormattedETDate } from "./time-utils";
 export function generateShareText(
   guessResults: GuessResult[],
   currentResortMetadata: SkiResortMetadata,
-  guessedCorrectly: boolean,
   currentResortFolderName: string,
   showCountryNames: boolean
 ): string {
