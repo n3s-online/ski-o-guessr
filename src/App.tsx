@@ -22,7 +22,7 @@ function DiscordInvite() {
   if (!isVisible) return null;
 
   return (
-    <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800 relative">
+    <div className="mt-6 mx-auto max-w-2xl p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800 relative">
       <button
         onClick={handleDismiss}
         className="absolute top-2 right-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
@@ -54,7 +54,7 @@ function DiscordInvite() {
           </p>
         </div>
         <a
-          href="https://discord.gg/your-invite-link"
+          href="https://discord.gg/4A6SuDP7Ws"
           target="_blank"
           rel="noopener noreferrer"
           className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors whitespace-nowrap text-sm font-medium flex items-center gap-2"
