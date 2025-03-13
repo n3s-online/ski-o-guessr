@@ -32,7 +32,15 @@ import {
   getDailySkiResort,
 } from "../lib/ski-data";
 import { Button } from "./ui/button";
-import { Loader2, Info, RefreshCw, Plus, Minus, Clock } from "lucide-react";
+import {
+  Loader2,
+  Info,
+  RefreshCw,
+  Plus,
+  Minus,
+  Clock,
+  Share2,
+} from "lucide-react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { GuessesTable } from "./GuessesTable";
 import { GuessResult } from "../types/game";
@@ -48,6 +56,8 @@ import {
   clearGameState,
   getLastPlayedDate,
 } from "../lib/storage-utils";
+import { generateShareText, copyToClipboard } from "../lib/share-utils";
+import toast from "react-hot-toast";
 
 export function GameDisplay() {
   const [skiResorts, setSkiResorts] = useState<SkiResort[]>([]);
@@ -283,7 +293,8 @@ export function GameDisplay() {
     setSelectedResort("");
   };
 
-  const handleNewGame = async () => {
+  // Rename handleNewGame to resetGame to make it clear it's only for internal resets
+  const resetGame = async () => {
     setLoading(true);
     setError(null);
     setGuessedCorrectly(false);
@@ -334,6 +345,28 @@ export function GameDisplay() {
     }
   }, [revealPercentage]);
 
+  // Handle share button click
+  const handleShare = async () => {
+    if (!currentResort || !metadata) return;
+
+    // Make sure we're passing the correct resort metadata and guessedCorrectly status
+    const shareText = generateShareText(
+      guessResults,
+      metadata,
+      guessedCorrectly,
+      currentResort.folderName
+    );
+    const success = await copyToClipboard(shareText);
+
+    if (success) {
+      toast.success("Results copied to clipboard!", {
+        duration: 3000,
+      });
+    } else {
+      toast.error("Failed to copy results to clipboard");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center min-h-[50vh]">
@@ -353,7 +386,7 @@ export function GameDisplay() {
           <AlertDescription className="mt-2">{error}</AlertDescription>
         </Alert>
         <Button
-          onClick={handleNewGame}
+          onClick={resetGame}
           className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
         >
           <RefreshCw className="mr-2 h-4 w-4" />
@@ -642,13 +675,20 @@ export function GameDisplay() {
                 </div>
               </div>
             </div>
-            <Button
-              onClick={handleNewGame}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
-            >
-              <RefreshCw className="mr-2 h-5 w-5" />
-              Play Again
-            </Button>
+            <div className="flex flex-col items-center gap-4">
+              <Button
+                onClick={handleShare}
+                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"
+              >
+                <Share2 className="mr-2 h-5 w-5" />
+                Share Results
+              </Button>
+              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                Come back tomorrow for a new puzzle! Next puzzle in{" "}
+                {timeUntilReset.hours}h {timeUntilReset.minutes}m{" "}
+                {timeUntilReset.seconds}s
+              </p>
+            </div>
 
             {/* Use the GuessesTable component with additional margin */}
             {guessResults.length > 0 && (
@@ -724,13 +764,20 @@ export function GameDisplay() {
                     <span className="font-semibold">{metadata.name}</span>
                   </AlertDescription>
                 </Alert>
-                <Button
-                  onClick={handleNewGame}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
-                >
-                  <RefreshCw className="mr-2 h-5 w-5" />
-                  Play Again
-                </Button>
+                <div className="flex flex-col items-center gap-4">
+                  <Button
+                    onClick={handleShare}
+                    className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"
+                  >
+                    <Share2 className="mr-2 h-5 w-5" />
+                    Share Results
+                  </Button>
+                  <p className="text-gray-600 dark:text-gray-400 mt-2">
+                    Come back tomorrow for a new puzzle! Next puzzle in{" "}
+                    {timeUntilReset.hours}h {timeUntilReset.minutes}m{" "}
+                    {timeUntilReset.seconds}s
+                  </p>
+                </div>
               </div>
             )}
           </>

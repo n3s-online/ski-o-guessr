@@ -3,7 +3,7 @@
  */
 
 // Game start date (UTC) - adjust this to your desired start date
-const GAME_START_DATE = new Date("2024-03-13T00:00:00Z");
+const GAME_START_DATE = new Date("2025-03-13T00:00:00Z");
 
 /**
  * Get the current date in Eastern Time (ET)
