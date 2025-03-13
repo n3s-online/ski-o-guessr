@@ -3,7 +3,7 @@
  */
 
 // Game start date (UTC) - adjust this to your desired start date
-const GAME_START_DATE = new Date("2024-03-01T00:00:00Z");
+const GAME_START_DATE = new Date("2024-03-13T00:00:00Z");
 
 /**
  * Get the current date in Eastern Time (ET)
@@ -78,6 +78,39 @@ export function getDailyPuzzleIndex(resortCount: number): number {
 
   // Use modulo to cycle through available resorts
   return ((daysSinceStart % resortCount) + resortCount) % resortCount;
+}
+
+/**
+ * Get the days since game start
+ * @returns Number of days since the game started
+ */
+export function getDaysSinceGameStart(): number {
+  const midnightET = getMidnightETDate();
+  const millisecondsPerDay = 24 * 60 * 60 * 1000;
+  return Math.floor(
+    (midnightET.getTime() - GAME_START_DATE.getTime()) / millisecondsPerDay
+  );
+}
+
+/**
+ * Generate deterministic coordinates for the daily puzzle
+ * This ensures all users see the same starting view
+ * @returns Coordinates object with x and y values
+ */
+export function getDailyCoordinates(): { x: number; y: number } {
+  // Use the days since game start as a seed
+  const daySeed = getDaysSinceGameStart();
+
+  // Use a simple but deterministic algorithm to generate coordinates
+  // This creates a pseudo-random but reproducible pattern
+  const seedX = (daySeed * 13) % 100;
+  const seedY = (daySeed * 17) % 100;
+
+  // Constrain to the middle 40% of the image (30% to 70%)
+  const x = 30 + (seedX % 40);
+  const y = 30 + (seedY % 40);
+
+  return { x, y };
 }
 
 /**

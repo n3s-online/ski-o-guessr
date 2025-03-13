@@ -40,6 +40,7 @@ import {
   shouldResetGame,
   getFormattedETDate,
   getTimeUntilReset,
+  getDailyCoordinates,
 } from "../lib/time-utils";
 import {
   saveGameState,
@@ -73,7 +74,9 @@ export function GameDisplay() {
 
   // New state variables for progressive reveal
   const [revealPercentage, setRevealPercentage] = useState(33);
-  const [centerCoordinates, setCenterCoordinates] = useState({ x: 50, y: 50 });
+  const [centerCoordinates, setCenterCoordinates] = useState(
+    getDailyCoordinates()
+  );
   const imageRef = useRef<HTMLImageElement>(null);
   const transformComponentRef = useRef(null);
   const timerRef = useRef<number | null>(null);
@@ -116,6 +119,7 @@ export function GameDisplay() {
           setPreviousGuesses(savedState.previousGuesses);
           setGuessResults(savedState.guessResults);
           setRevealPercentage(savedState.revealPercentage);
+          // Use saved coordinates to maintain consistency for the user
           setCenterCoordinates(savedState.centerCoordinates);
         } else {
           // Fallback to daily resort if saved resort not found
@@ -197,10 +201,9 @@ export function GameDisplay() {
     setGuessResults([]);
     setRevealPercentage(33);
 
-    // Generate random coordinates within the middle 40% of the image
-    const x = 30 + Math.random() * 40; // 30% to 70%
-    const y = 30 + Math.random() * 40; // 30% to 70%
-    setCenterCoordinates({ x, y });
+    // Get deterministic coordinates for today's puzzle
+    const dailyCoordinates = getDailyCoordinates();
+    setCenterCoordinates(dailyCoordinates);
 
     // Save initial game state
     saveGameState({
@@ -209,7 +212,7 @@ export function GameDisplay() {
       previousGuesses: [],
       guessResults: [],
       revealPercentage: 33,
-      centerCoordinates: { x, y },
+      centerCoordinates: dailyCoordinates,
     });
   };
 
