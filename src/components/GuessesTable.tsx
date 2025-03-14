@@ -46,7 +46,7 @@ export const GuessesTable = ({
   // Listen for settings changes
   useEffect(() => {
     const handleSettingsChange = () => {
-      const settingsStr = localStorage.getItem("ski-o-guessr-settings");
+      const settingsStr = localStorage.getItem("ski-o-guessr-settings-v2");
       if (settingsStr) {
         try {
           const settings = JSON.parse(settingsStr);
