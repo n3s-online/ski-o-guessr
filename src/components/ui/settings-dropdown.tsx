@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "./dropdown-menu";
 
-const STORAGE_KEY = "ski-o-guessr-settings";
+const STORAGE_KEY = "ski-o-guessr-settings-v2";
 
 export interface AppSettings {
   showCountryNames: boolean;
@@ -18,7 +18,7 @@ export interface AppSettings {
 }
 
 export function SettingsDropdown() {
-  const [showCountryNames, setShowCountryNames] = useState<boolean>(false);
+  const [showCountryNames, setShowCountryNames] = useState<boolean>(true);
   const [useMetricUnits, setUseMetricUnits] = useState<boolean>(false);
 
   useEffect(() => {

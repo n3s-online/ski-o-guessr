@@ -91,7 +91,7 @@ export function GameDisplay() {
   const transformComponentRef = useRef(null);
   const timerRef = useRef<number | null>(null);
 
-  const [showCountryNames, setShowCountryNames] = useState<boolean>(false);
+  const [showCountryNames, setShowCountryNames] = useState<boolean>(true);
   const [useMetricUnits, setUseMetricUnits] = useState<boolean>(false);
 
   // Define the loadGame function
